@@ -4,6 +4,7 @@ let bookShow = document.getElementById("discription")
 
 
 
+
 // allows to show all list of books
 fetch("http://localhost:3000/books")
 .then(response => response.json())
@@ -56,16 +57,16 @@ function renderBook(){
                 <button>Submit</button>
             </form>
             <br>
-            </div>`
+            </div>` 
 
             
            //create a review
             let reviewCreate = document.querySelector(".create")
             reviewCreate.addEventListener("submit", (evt) => {
 
+                evt.preventDefault();
                 let newName = evt.target.name.value
                 let newContent = evt.target.content.value
-                evt.preventDefault();
             
                 fetch(`http://localhost:3000/reviews`, {
                     method: "POST",
@@ -91,6 +92,8 @@ function renderBook(){
                             <p>${reviewsArr.name}</p>
                             <p>${reviewsArr.content}</p>
                             <button id='delete'>Delete</button>
+                            <input type='text'>
+                            <button id='edit'>Edit</button>
                             </div>`
                         reviewCreate.reset()
                     }
@@ -101,25 +104,52 @@ function renderBook(){
                 reviewRev1.innerHTML +=
                     `<div id="review-${review.id}"
                         <p>${review.name}</p> 
-                        <p>${review.content}<p>
+                        <p>${review.content}</p>
                         <button data-id=${review.id} id='delete'>Delete</button>
+                        <input type='text'>
+                        <button data-id=${review.id} id='edit'>Edit</button>
                     </div>`
             })
 
             // delete a review
             reviewRev1.addEventListener("click", (e) => {
+                // debugger
                 let id = e.target.dataset.id
                 if (e.target.id === "delete") {
-                    // reviewId = e.target.parentElement.parentElement.id.slice(7)
                     fetch(`http://localhost:3000/reviews/${id}`, {
                         method: "DELETE"
                     })
                     .then(() => {
-                        e.target.parentElement.parentElement.remove()
+                        e.target.parentElement.remove()
                     })
-                }
+                } 
             })
 
+            //updating your content review
+            reviewRev1.addEventListener("click", (e) => {
+                
+                let editContent = e.target.previousElementSibling.value
+                let id = e.target.dataset.id
+                if (e.target.id === "edit") {
+                    fetch(`http://localhost:3000/reviews/${id}`, {
+                        method: "PATCH",
+                        headers: {
+                            "Content-type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify({
+                            content: editContent
+                        })
+                    })
+                    .then(response => response.json())
+                    .then((newReview) => {
+                        // debugger
+                        e.target.parentElement.children[1].innerText = newReview.content
+                        
+                    })
+                    
+                }
+            })
         })
     })
 }
